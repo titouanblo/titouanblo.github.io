@@ -1,0 +1,10 @@
+---
+import Site from '../layouts/Site.astro';
+---
+<Site>
+  <script>
+    import { mount } from '../scenes/paper';
+    import { startPage } from '../scenes/page';
+    startPage(mount);
+  </script>
+</Site>

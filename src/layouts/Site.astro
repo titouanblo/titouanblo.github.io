@@ -1,0 +1,136 @@
+---
+import '@fontsource-variable/dm-sans';
+import '@fontsource-variable/josefin-sans';
+import '../styles/site.css';
+import { profile, sections } from '../data/content';
+
+const url = Astro.site!.href;
+// Structured data: tells search engines this page is the profile of one person, with the same facts as the page.
+const [givenName, ...rest] = profile.name.split(' ');
+const page = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  mainEntity: {
+    '@type': 'Person',
+    name: profile.name,
+    givenName,
+    familyName: rest.join(' '),
+    description: profile.summary,
+    url,
+    affiliation: { '@type': 'CollegeOrUniversity', name: 'École Polytechnique' },
+    knowsAbout: profile.topics,
+    knowsLanguage: ['French', 'English', 'Spanish'],
+    sameAs: profile.links.map((l) => l.href),
+  },
+};
+---
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={profile.snippet} />
+    <link rel="canonical" href={url} />
+    <meta property="og:type" content="profile" />
+    <meta property="og:url" content={url} />
+    <meta property="og:site_name" content={profile.name} />
+    <meta property="og:title" content={profile.title} />
+    <meta property="og:description" content={profile.snippet} />
+    <meta property="og:image" content={new URL('og.jpg', url).href} />
+    <meta name="twitter:card" content="summary_large_image" />
+    <link rel="sitemap" href="/sitemap.xml" />
+    <script type="application/ld+json" set:html={JSON.stringify(page)} />
+    <meta name="theme-color" content="#0a3058" />
+    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <title>{profile.title}</title>
+    <noscript><style>.reveal { opacity: 1; transform: none; }</style></noscript>
+  </head>
+  <body>
+    <div class="scene" aria-hidden="true"><canvas id="scene"></canvas></div>
+
+    <header class="nav">
+      <a class="nav-name" href="#top">{profile.name}</a>
+      <nav aria-label="Sections">
+        {sections.map((s) => <a href={`#${s.id}`} data-nav={s.id}>{s.label.split(' ')[0]}</a>)}
+        <a href="#contact" data-nav="contact">Contact</a>
+      </nav>
+    </header>
+
+    <main id="top">
+      <section class="hero">
+        <div class="hero-text panel">
+          <h1>{profile.name}</h1>
+          <p class="role">{profile.role}</p>
+          <p class="intro">{profile.intro}</p>
+          <p class="links">{profile.links.map((l) => <a href={l.href}>{l.label}</a>)}</p>
+        </div>
+      </section>
+
+      {sections.map((s, i) => (
+        <section class="block" id={s.id}>
+          <div class="panel reveal">
+            <p class="kicker">0{i + 1}</p>
+            <h2>{s.label}</h2>
+            {s.about && (
+              <dl class="about">
+                {s.about.map((a) => <div><dt>{a.label}</dt><dd>{a.text}</dd></div>)}
+              </dl>
+            )}
+            {s.entries.length > 0 && (
+              <ul class:list={['entries', { compact: s.compact }]}>
+                {s.entries.map((e) => (
+                  <li>
+                    {s.expand && e.points ? (
+                      <details>
+                        <summary>
+                          <h3>{e.title}</h3>
+                          {e.date && <span class="date">{e.date}</span>}
+                          {e.meta && <span class="meta">{e.meta}</span>}
+                          {e.lead && <span class="lead">{e.lead}</span>}
+                        </summary>
+                        <div class="more">
+                          {e.text && <p>{e.text}</p>}
+                          <ul class="points">{e.points.map((pt) => <li>{pt}</li>)}</ul>
+                          {(e.paper || e.href) && (
+                            <p class="code-link">
+                              {e.paper && <a href={e.paper}>Read the paper</a>}
+                              {e.href && <a href={e.href}>Code on GitHub</a>}
+                            </p>
+                          )}
+                        </div>
+                      </details>
+                    ) : (
+                      <>
+                        <div class="entry-head">
+                          <h3>{e.href ? <a href={e.href}>{e.title}</a> : e.title}</h3>
+                          {e.date && <span class="date">{e.date}</span>}
+                        </div>
+                        {e.meta && <p class="meta">{e.meta}</p>}
+                        {e.lead && <p>{e.lead}</p>}
+                        {e.text && <p>{e.text}</p>}
+                        {e.points && <ul class="points">{e.points.map((pt) => <li>{pt}</li>)}</ul>}
+                      </>
+                    )}
+                  </li>
+                ))}
+              </ul>
+            )}
+            {s.note && <p class="note">{s.note}</p>}
+          </div>
+        </section>
+      ))}
+
+      <section class="block last" id="contact">
+        <div class="panel reveal">
+          <p class="kicker">0{sections.length + 1}</p>
+          <h2>Contact</h2>
+          <p class="links">{profile.links.map((l) => <a href={l.href}>{l.label}</a>)}</p>
+          <p class="email">{profile.email}</p>
+        </div>
+      </section>
+    </main>
+
+    <slot />
+  </body>
+</html>

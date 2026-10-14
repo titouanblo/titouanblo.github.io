@@ -80,7 +80,6 @@ export const sections: Section[] = [
           'Designed and implemented an agentic workflow to increase Analysts’ efficiency.',
           'Resolved a long-standing translation issue by redesigning the underlying translation pipeline.',
           'Increased efficiency tenfold, ensuring continued scaling for Gemini.',
-          'Cut translation error rate from 40% to 2% and average latency from 8s to 1s.',
         ],
       },
       {
